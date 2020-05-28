@@ -21,6 +21,7 @@
 #include "CloseButton.h"
 #include "MaximizeButton.h"
 #include "MinimizeButton.h"
+#include "MenuButton.h"
 
 // KDecoration
 #include <KDecoration2/DecoratedClient>
@@ -146,6 +147,9 @@ void Decoration::init()
 
         case KDecoration2::DecorationButtonType::Minimize:
             return new MinimizeButton(this, parent);
+
+        case KDecoration2::DecorationButtonType::Menu:
+            return new MenuButton(this, parent);
 
         default:
             return nullptr;
