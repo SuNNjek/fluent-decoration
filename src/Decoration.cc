@@ -31,6 +31,7 @@
 // Qt
 #include <QPainter>
 #include <QSharedPointer>
+#include <QTimer>
 
 namespace Material
 {
@@ -134,6 +135,15 @@ void Decoration::init()
     updateResizeBorders();
     updateTitleBar();
 
+    auto s = settings();
+    connect(s.data(), &KDecoration2::DecorationSettings::borderSizeChanged, this, &Decoration::updateBorders);
+    connect(s.data(), &KDecoration2::DecorationSettings::fontChanged, this, &Decoration::updateBorders);
+    connect(s.data(), &KDecoration2::DecorationSettings::spacingChanged, this, &Decoration::updateBorders);
+
+    connect(s.data(), &KDecoration2::DecorationSettings::spacingChanged, this, &Decoration::updateButtonsGeometryDelayed);
+    connect(s.data(), &KDecoration2::DecorationSettings::decorationButtonsLeftChanged, this, &Decoration::updateButtonsGeometryDelayed);
+    connect(s.data(), &KDecoration2::DecorationSettings::decorationButtonsRightChanged, this, &Decoration::updateButtonsGeometryDelayed);
+
     auto buttonCreator = [this] (KDecoration2::DecorationButtonType type, KDecoration2::Decoration *decoration, QObject *parent)
             -> KDecoration2::DecorationButton* {
         Q_UNUSED(decoration)
@@ -214,6 +224,11 @@ void Decoration::updateButtonsGeometry()
     update();
 }
 
+void Decoration::updateButtonsGeometryDelayed()
+{
+    QTimer::singleShot(0, this, &Decoration::updateButtonsGeometry);
+}
+
 void Decoration::updateShadow()
 {
     if (!s_cachedShadow.isNull()) {
@@ -289,7 +304,7 @@ void Decoration::updateShadow()
 int Decoration::titleBarHeight() const
 {
     const QFontMetrics fontMetrics(settings()->font());
-    const int baseUnit = settings()->gridUnit();
+    const int baseUnit = settings()->largeSpacing();
     return qRound(1.5 * baseUnit) + fontMetrics.height();
 }
 
@@ -367,27 +382,13 @@ void Decoration::paintCaption(QPainter *painter, const QRect &repaintRegion) con
         -(m_rightButtons->geometry().width() + settings()->smallSpacing()), 0
     );
 
-    QRect captionRect;
-    Qt::Alignment alignment;
-
-    if (textRect.left() < availableRect.left()) {
-        captionRect = availableRect;
-        alignment = Qt::AlignLeft | Qt::AlignVCenter;
-    } else if (availableRect.right() < textRect.right()) {
-        captionRect = availableRect;
-        alignment = Qt::AlignRight | Qt::AlignVCenter;
-    } else {
-        captionRect = titleBarRect;
-        alignment = Qt::AlignCenter;
-    }
-
     const QString caption = painter->fontMetrics().elidedText(
-        decoratedClient->caption(), Qt::ElideMiddle, captionRect.width());
+        decoratedClient->caption(), Qt::ElideRight, availableRect.width());
 
     painter->save();
     painter->setFont(settings()->font());
     painter->setPen(titleBarForegroundColor());
-    painter->drawText(captionRect, alignment, caption);
+    painter->drawText(availableRect, Qt::AlignLeft | Qt::AlignVCenter, caption);
     painter->restore();
 }
 

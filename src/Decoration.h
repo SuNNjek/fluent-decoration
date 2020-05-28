@@ -50,6 +50,7 @@ private:
     void updateResizeBorders();
     void updateTitleBar();
     void updateButtonsGeometry();
+    void updateButtonsGeometryDelayed();
     void updateShadow();
 
     int titleBarHeight() const;
