@@ -28,7 +28,7 @@
 // Qt
 #include <QPainter>
 
-namespace Material
+namespace Fluent
 {
     MenuButton::MenuButton(Decoration *decoration, QObject *parent)
             : DecorationButton(KDecoration2::DecorationButtonType::Menu, decoration, parent)
@@ -61,4 +61,4 @@ namespace Material
 
         decoratedClient->icon().paint(painter, iconRect.toRect());
     }
-} // namespace Material
+} // namespace Fluent

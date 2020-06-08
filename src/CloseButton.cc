@@ -25,7 +25,7 @@
 // Qt
 #include <QPainter>
 
-namespace Material
+namespace Fluent
 {
 
 CloseButton::CloseButton(Decoration *decoration, QObject *parent)
@@ -112,4 +112,4 @@ QColor CloseButton::foregroundColor() const
     return deco->titleBarForegroundColor();
 }
 
-} // namespace Material
+} // namespace Fluent

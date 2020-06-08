@@ -28,7 +28,7 @@
 // Qt
 #include <QPainter>
 
-namespace Material
+namespace Fluent
 {
 
 MinimizeButton::MinimizeButton(Decoration *decoration, QObject *parent)
@@ -114,4 +114,4 @@ QColor MinimizeButton::foregroundColor() const
     return deco->titleBarForegroundColor();
 }
 
-} // namespace Material
+} // namespace Fluent

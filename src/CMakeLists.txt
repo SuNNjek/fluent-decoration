@@ -22,11 +22,11 @@ set (decoration_SRCS
     plugin.cc
 )
 
-add_library (materialdecoration MODULE
+add_library (fluentdecoration MODULE
     ${decoration_SRCS}
 )
 
-target_link_libraries (materialdecoration
+target_link_libraries (fluentdecoration
     PUBLIC
         Qt5::Core
         Qt5::Gui
@@ -40,5 +40,5 @@ target_link_libraries (materialdecoration
         KDecoration2::KDecoration
 )
 
-install (TARGETS materialdecoration
+install (TARGETS fluentdecoration
          DESTINATION ${PLUGIN_INSTALL_DIR}/org.kde.kdecoration2)

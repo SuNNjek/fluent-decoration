@@ -33,7 +33,7 @@
 #include <QSharedPointer>
 #include <QTimer>
 
-namespace Material
+namespace Fluent
 {
 
 namespace
@@ -398,4 +398,4 @@ void Decoration::paintButtons(QPainter *painter, const QRect &repaintRegion) con
     m_rightButtons->paint(painter, repaintRegion);
 }
 
-} // namespace Material
+} // namespace Fluent

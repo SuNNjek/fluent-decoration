@@ -20,7 +20,7 @@
 // KDecoration
 #include <KDecoration2/DecorationButton>
 
-namespace Material
+namespace Fluent
 {
     class Decoration;
 
@@ -34,4 +34,4 @@ namespace Material
 
         void paint(QPainter *painter, const QRect &repaintRegion) override;
     };
-} // namespace Material
+} // namespace Fluent

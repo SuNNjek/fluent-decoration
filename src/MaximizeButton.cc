@@ -28,7 +28,7 @@
 // Qt
 #include <QPainter>
 
-namespace Material
+namespace Fluent
 {
 
 MaximizeButton::MaximizeButton(Decoration *decoration, QObject *parent)
@@ -130,4 +130,4 @@ QColor MaximizeButton::foregroundColor() const
     return deco->titleBarForegroundColor();
 }
 
-} // namespace Material
+} // namespace Fluent

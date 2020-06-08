@@ -1,8 +1,8 @@
 ![Demo](data/window.png)
 
-## material-decoration
+## fluent-decoration
 
-Material-ish window decoration theme for KWin.
+Fluent-ish window decoration theme for KWin.
 
 ### Installation
 
