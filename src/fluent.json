@@ -3,7 +3,7 @@
         "Description": "Fluent-ish window decoration theme for KWin.",
         "EnabledByDefault": false,
         "Id": "com.github.sunnjek.fluent",
-        "Name": "Material",
+        "Name": "Fluent",
         "ServiceTypes": [
             "org.kde.kdecoration2"
         ]
