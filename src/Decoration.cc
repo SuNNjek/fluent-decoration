@@ -21,6 +21,7 @@
 #include "CloseButton.h"
 #include "MaximizeButton.h"
 #include "MinimizeButton.h"
+#include "MenuButton.h"
 
 // KDecoration
 #include <KDecoration2/DecoratedClient>
@@ -30,8 +31,9 @@
 // Qt
 #include <QPainter>
 #include <QSharedPointer>
+#include <QTimer>
 
-namespace Material
+namespace Fluent
 {
 
 namespace
@@ -98,7 +100,7 @@ Decoration::~Decoration()
 
 void Decoration::paint(QPainter *painter, const QRect &repaintRegion)
 {
-    auto *decoratedClient = client().data();
+    auto *decoratedClient = client().toStrongRef().data();
 
     if (!decoratedClient->isShaded()) {
         paintFrameBackground(painter, repaintRegion);
@@ -111,7 +113,7 @@ void Decoration::paint(QPainter *painter, const QRect &repaintRegion)
 
 void Decoration::init()
 {
-    auto *decoratedClient = client().data();
+    auto *decoratedClient = client().toStrongRef().data();
 
     connect(decoratedClient, &KDecoration2::DecoratedClient::widthChanged,
             this, &Decoration::updateTitleBar);
@@ -133,6 +135,15 @@ void Decoration::init()
     updateResizeBorders();
     updateTitleBar();
 
+    auto s = settings();
+    connect(s.data(), &KDecoration2::DecorationSettings::borderSizeChanged, this, &Decoration::updateBorders);
+    connect(s.data(), &KDecoration2::DecorationSettings::fontChanged, this, &Decoration::updateBorders);
+    connect(s.data(), &KDecoration2::DecorationSettings::spacingChanged, this, &Decoration::updateBorders);
+
+    connect(s.data(), &KDecoration2::DecorationSettings::spacingChanged, this, &Decoration::updateButtonsGeometryDelayed);
+    connect(s.data(), &KDecoration2::DecorationSettings::decorationButtonsLeftChanged, this, &Decoration::updateButtonsGeometryDelayed);
+    connect(s.data(), &KDecoration2::DecorationSettings::decorationButtonsRightChanged, this, &Decoration::updateButtonsGeometryDelayed);
+
     auto buttonCreator = [this] (KDecoration2::DecorationButtonType type, KDecoration2::Decoration *decoration, QObject *parent)
             -> KDecoration2::DecorationButton* {
         Q_UNUSED(decoration)
@@ -146,6 +157,9 @@ void Decoration::init()
 
         case KDecoration2::DecorationButtonType::Minimize:
             return new MinimizeButton(this, parent);
+
+        case KDecoration2::DecorationButtonType::Menu:
+            return new MenuButton(this, parent);
 
         default:
             return nullptr;
@@ -191,7 +205,7 @@ void Decoration::updateResizeBorders()
 
 void Decoration::updateTitleBar()
 {
-    auto *decoratedClient = client().data();
+    auto *decoratedClient = client().toStrongRef().data();
     setTitleBar(QRect(0, 0, decoratedClient->width(), titleBarHeight()));
 }
 
@@ -208,6 +222,11 @@ void Decoration::updateButtonsGeometry()
     }
 
     update();
+}
+
+void Decoration::updateButtonsGeometryDelayed()
+{
+    QTimer::singleShot(0, this, &Decoration::updateButtonsGeometry);
 }
 
 void Decoration::updateShadow()
@@ -285,7 +304,7 @@ void Decoration::updateShadow()
 int Decoration::titleBarHeight() const
 {
     const QFontMetrics fontMetrics(settings()->font());
-    const int baseUnit = settings()->gridUnit();
+    const int baseUnit = settings()->largeSpacing();
     return qRound(1.5 * baseUnit) + fontMetrics.height();
 }
 
@@ -293,7 +312,7 @@ void Decoration::paintFrameBackground(QPainter *painter, const QRect &repaintReg
 {
     Q_UNUSED(repaintRegion)
 
-    const auto *decoratedClient = client().data();
+    const auto *decoratedClient = client().toStrongRef().data();
 
     painter->save();
 
@@ -313,7 +332,7 @@ void Decoration::paintFrameBackground(QPainter *painter, const QRect &repaintReg
 
 QColor Decoration::titleBarBackgroundColor() const
 {
-    const auto *decoratedClient = client().data();
+    const auto *decoratedClient = client().toStrongRef().data();
     const auto group = decoratedClient->isActive()
         ? KDecoration2::ColorGroup::Active
         : KDecoration2::ColorGroup::Inactive;
@@ -327,7 +346,7 @@ QColor Decoration::titleBarBackgroundColor() const
 
 QColor Decoration::titleBarForegroundColor() const
 {
-    const auto *decoratedClient = client().data();
+    const auto *decoratedClient = client().toStrongRef().data();
     const auto group = decoratedClient->isActive()
         ? KDecoration2::ColorGroup::Active
         : KDecoration2::ColorGroup::Inactive;
@@ -338,7 +357,7 @@ void Decoration::paintTitleBarBackground(QPainter *painter, const QRect &repaint
 {
     Q_UNUSED(repaintRegion)
 
-    const auto *decoratedClient = client().data();
+    const auto *decoratedClient = client().toStrongRef().data();
 
     painter->save();
     painter->setPen(Qt::NoPen);
@@ -351,7 +370,7 @@ void Decoration::paintCaption(QPainter *painter, const QRect &repaintRegion) con
 {
     Q_UNUSED(repaintRegion)
 
-    const auto *decoratedClient = client().data();
+    const auto *decoratedClient = client().toStrongRef().data();
 
     const int textWidth = settings()->fontMetrics().boundingRect(decoratedClient->caption()).width();
     const QRect textRect((size().width() - textWidth) / 2, 0, textWidth, titleBarHeight());
@@ -363,27 +382,13 @@ void Decoration::paintCaption(QPainter *painter, const QRect &repaintRegion) con
         -(m_rightButtons->geometry().width() + settings()->smallSpacing()), 0
     );
 
-    QRect captionRect;
-    Qt::Alignment alignment;
-
-    if (textRect.left() < availableRect.left()) {
-        captionRect = availableRect;
-        alignment = Qt::AlignLeft | Qt::AlignVCenter;
-    } else if (availableRect.right() < textRect.right()) {
-        captionRect = availableRect;
-        alignment = Qt::AlignRight | Qt::AlignVCenter;
-    } else {
-        captionRect = titleBarRect;
-        alignment = Qt::AlignCenter;
-    }
-
     const QString caption = painter->fontMetrics().elidedText(
-        decoratedClient->caption(), Qt::ElideMiddle, captionRect.width());
+        decoratedClient->caption(), Qt::ElideRight, availableRect.width());
 
     painter->save();
     painter->setFont(settings()->font());
     painter->setPen(titleBarForegroundColor());
-    painter->drawText(captionRect, alignment, caption);
+    painter->drawText(availableRect, Qt::AlignLeft | Qt::AlignVCenter, caption);
     painter->restore();
 }
 
@@ -393,4 +398,4 @@ void Decoration::paintButtons(QPainter *painter, const QRect &repaintRegion) con
     m_rightButtons->paint(painter, repaintRegion);
 }
 
-} // namespace Material
+} // namespace Fluent

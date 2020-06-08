@@ -24,12 +24,13 @@
 // Qt
 #include <QVariant>
 
-namespace Material
+namespace Fluent
 {
 
 class CloseButton;
 class MaximizeButton;
 class MinimizeButton;
+class MenuButton;
 
 class Decoration : public KDecoration2::Decoration
 {
@@ -49,6 +50,7 @@ private:
     void updateResizeBorders();
     void updateTitleBar();
     void updateButtonsGeometry();
+    void updateButtonsGeometryDelayed();
     void updateShadow();
 
     int titleBarHeight() const;
@@ -67,6 +69,7 @@ private:
     friend class CloseButton;
     friend class MaximizeButton;
     friend class MinimizeButton;
+    friend class MenuButton;
 };
 
-} // namespace Material
+} // namespace Fluent
