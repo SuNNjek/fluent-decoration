@@ -34,4 +34,4 @@ namespace Fluent
 
         void paint(QPainter *painter, const QRect &repaintRegion) override;
     };
-} // namespace Fluent
+}

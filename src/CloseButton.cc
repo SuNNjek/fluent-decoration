@@ -27,89 +27,88 @@
 
 namespace Fluent
 {
+    CloseButton::CloseButton(Decoration *decoration, QObject *parent)
+            : DecorationButton(KDecoration2::DecorationButtonType::Close, decoration, parent)
+    {
+        auto *decoratedClient = decoration->client().toStrongRef().data();
+        connect(decoratedClient, &KDecoration2::DecoratedClient::closeableChanged,
+                this, &CloseButton::setVisible);
 
-CloseButton::CloseButton(Decoration *decoration, QObject *parent)
-    : DecorationButton(KDecoration2::DecorationButtonType::Close, decoration, parent)
-{
-    auto *decoratedClient = decoration->client().toStrongRef().data();
-    connect(decoratedClient, &KDecoration2::DecoratedClient::closeableChanged,
-            this, &CloseButton::setVisible);
+        connect(this, &CloseButton::hoveredChanged, this,
+                [this] {
+                    update();
+                });
 
-    connect(this, &CloseButton::hoveredChanged, this,
-        [this] {
-            update();
-        });
-
-    const int titleBarHeight = decoration->titleBarHeight();
-    const QSize size(qRound(titleBarHeight * 1.33), titleBarHeight);
-    setGeometry(QRect(QPoint(0, 0), size));
-    setVisible(decoratedClient->isCloseable());
-}
-
-CloseButton::~CloseButton()
-{
-}
-
-void CloseButton::paint(QPainter *painter, const QRect &repaintRegion)
-{
-    Q_UNUSED(repaintRegion)
-
-    const QRectF buttonRect = geometry();
-    QRectF crossRect = QRectF(0, 0, 10, 10);
-    crossRect.moveCenter(buttonRect.center().toPoint());
-
-    painter->save();
-
-    painter->setRenderHints(QPainter::Antialiasing, false);
-
-    // Background.
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(backgroundColor());
-    painter->drawRect(buttonRect);
-
-    // Foreground.
-    painter->setPen(foregroundColor());
-    painter->setBrush(Qt::NoBrush);
-    painter->drawLine(crossRect.topLeft(), crossRect.bottomRight());
-    painter->drawLine(crossRect.topRight(), crossRect.bottomLeft());
-
-    painter->restore();
-}
-
-QColor CloseButton::backgroundColor() const
-{
-    const auto *deco = qobject_cast<Decoration *>(decoration());
-    if (!deco) {
-        return {};
+        const int titleBarHeight = decoration->titleBarHeight();
+        const QSize size(qRound(titleBarHeight * 1.33), titleBarHeight);
+        setGeometry(QRect(QPoint(0, 0), size));
+        setVisible(decoratedClient->isCloseable());
     }
 
-    if (isPressed()) {
-        auto *decoratedClient = deco->client().toStrongRef().data();
-        return decoratedClient->color(
-            KDecoration2::ColorGroup::Warning,
-            KDecoration2::ColorRole::Foreground
-        ).lighter();
+    CloseButton::~CloseButton()
+    {
     }
 
-    if (isHovered()) {
-        auto *decoratedClient = deco->client().toStrongRef().data();
-        return decoratedClient->color(
-            KDecoration2::ColorGroup::Warning,
-            KDecoration2::ColorRole::Foreground
-        );
+    void CloseButton::paint(QPainter *painter, const QRect &repaintRegion)
+    {
+        Q_UNUSED(repaintRegion)
+
+        const QRectF buttonRect = geometry();
+        QRectF crossRect = QRectF(0, 0, 10, 10);
+        crossRect.moveCenter(buttonRect.center().toPoint());
+
+        painter->save();
+
+        painter->setRenderHints(QPainter::Antialiasing, false);
+
+        // Background.
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(backgroundColor());
+        painter->drawRect(buttonRect);
+
+        // Foreground.
+        painter->setPen(foregroundColor());
+        painter->setBrush(Qt::NoBrush);
+        painter->drawLine(crossRect.topLeft(), crossRect.bottomRight());
+        painter->drawLine(crossRect.topRight(), crossRect.bottomLeft());
+
+        painter->restore();
     }
 
-    return Qt::transparent;
+    QColor CloseButton::backgroundColor() const
+    {
+        const auto *deco = qobject_cast<Decoration *>(decoration());
+        if (!deco) {
+            return {};
+        }
+
+        if (isPressed()) {
+            auto *decoratedClient = deco->client().toStrongRef().data();
+            return decoratedClient->color(
+                    KDecoration2::ColorGroup::Warning,
+                    KDecoration2::ColorRole::Foreground
+            ).lighter();
+        }
+
+        if (isHovered()) {
+            auto *decoratedClient = deco->client().toStrongRef().data();
+            return decoratedClient->color(
+                    KDecoration2::ColorGroup::Warning,
+                    KDecoration2::ColorRole::Foreground
+            );
+        }
+
+        return Qt::transparent;
+    }
+
+    QColor CloseButton::foregroundColor() const
+    {
+        const auto *deco = qobject_cast<Decoration *>(decoration());
+        if (!deco) {
+            return {};
+        }
+
+        return deco->titleBarForegroundColor();
+    }
+
 }
-
-QColor CloseButton::foregroundColor() const
-{
-    const auto *deco = qobject_cast<Decoration *>(decoration());
-    if (!deco) {
-        return {};
-    }
-
-    return deco->titleBarForegroundColor();
-}
-
-} // namespace Fluent

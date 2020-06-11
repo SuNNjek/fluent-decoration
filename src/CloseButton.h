@@ -22,22 +22,20 @@
 
 namespace Fluent
 {
+    class Decoration;
 
-class Decoration;
-
-class CloseButton : public KDecoration2::DecorationButton
-{
+    class CloseButton : public KDecoration2::DecorationButton
+    {
     Q_OBJECT
 
-public:
-    CloseButton(Decoration *decoration, QObject *parent = nullptr);
-    ~CloseButton() override;
+    public:
+        CloseButton(Decoration *decoration, QObject *parent = nullptr);
+        ~CloseButton() override;
 
-    void paint(QPainter *painter, const QRect &repaintRegion) override;
+        void paint(QPainter *painter, const QRect &repaintRegion) override;
 
-private:
-    QColor backgroundColor() const;
-    QColor foregroundColor() const;
-};
-
-} // namespace Fluent
+    private:
+        QColor backgroundColor() const;
+        QColor foregroundColor() const;
+    };
+}

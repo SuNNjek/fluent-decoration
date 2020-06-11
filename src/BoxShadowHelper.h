@@ -25,11 +25,9 @@
 
 namespace Fluent
 {
-namespace BoxShadowHelper
-{
-
-void boxShadow(QPainter *p, const QRect &box, const QPoint &offset,
-               int radius, const QColor &color);
-
-} // namespace BoxShadowHelper
-} // namespace Fluent
+    namespace BoxShadowHelper
+    {
+        void boxShadow(QPainter *p, const QRect &box, const QPoint &offset,
+                       int radius, const QColor &color);
+    }
+}

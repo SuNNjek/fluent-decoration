@@ -30,88 +30,86 @@
 
 namespace Fluent
 {
+    MinimizeButton::MinimizeButton(Decoration *decoration, QObject *parent)
+            : DecorationButton(KDecoration2::DecorationButtonType::Minimize, decoration, parent)
+    {
+        auto *decoratedClient = decoration->client().toStrongRef().data();
+        connect(decoratedClient, &KDecoration2::DecoratedClient::minimizeableChanged,
+                this, &MinimizeButton::setVisible);
 
-MinimizeButton::MinimizeButton(Decoration *decoration, QObject *parent)
-    : DecorationButton(KDecoration2::DecorationButtonType::Minimize, decoration, parent)
-{
-    auto *decoratedClient = decoration->client().toStrongRef().data();
-    connect(decoratedClient, &KDecoration2::DecoratedClient::minimizeableChanged,
-            this, &MinimizeButton::setVisible);
+        connect(this, &MinimizeButton::hoveredChanged, this,
+                [this] {
+                    update();
+                });
 
-    connect(this, &MinimizeButton::hoveredChanged, this,
-        [this] {
-            update();
-        });
-
-    const int titleBarHeight = decoration->titleBarHeight();
-    const QSize size(qRound(titleBarHeight * 1.33), titleBarHeight);
-    setGeometry(QRect(QPoint(0, 0), size));
-    setVisible(decoratedClient->isMinimizeable());
-}
-
-MinimizeButton::~MinimizeButton()
-{
-}
-
-void MinimizeButton::paint(QPainter *painter, const QRect &repaintRegion)
-{
-    Q_UNUSED(repaintRegion)
-
-    const QRectF buttonRect = geometry();
-    QRectF minimizeRect = QRectF(0, 0, 10, 10);
-    minimizeRect.moveCenter(buttonRect.center().toPoint());
-
-    painter->save();
-
-    painter->setRenderHints(QPainter::Antialiasing, false);
-
-    // Background.
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(backgroundColor());
-    painter->drawRect(buttonRect);
-
-    // Foreground.
-    painter->setPen(foregroundColor());
-    painter->setBrush(Qt::NoBrush);
-    painter->drawLine(
-        minimizeRect.left(), minimizeRect.center().y(),
-        minimizeRect.right(), minimizeRect.center().y());
-
-    painter->restore();
-}
-
-QColor MinimizeButton::backgroundColor() const
-{
-    const auto *deco = qobject_cast<Decoration *>(decoration());
-    if (!deco) {
-        return {};
+        const int titleBarHeight = decoration->titleBarHeight();
+        const QSize size(qRound(titleBarHeight * 1.33), titleBarHeight);
+        setGeometry(QRect(QPoint(0, 0), size));
+        setVisible(decoratedClient->isMinimizeable());
     }
 
-    if (isPressed()) {
-        return KColorUtils::mix(
-            deco->titleBarBackgroundColor(),
-            deco->titleBarForegroundColor(),
-            0.3);
+    MinimizeButton::~MinimizeButton()
+    {
     }
 
-    if (isHovered()) {
-        return KColorUtils::mix(
-            deco->titleBarBackgroundColor(),
-            deco->titleBarForegroundColor(),
-            0.2);
+    void MinimizeButton::paint(QPainter *painter, const QRect &repaintRegion)
+    {
+        Q_UNUSED(repaintRegion)
+
+        const QRectF buttonRect = geometry();
+        QRectF minimizeRect = QRectF(0, 0, 10, 10);
+        minimizeRect.moveCenter(buttonRect.center().toPoint());
+
+        painter->save();
+
+        painter->setRenderHints(QPainter::Antialiasing, false);
+
+        // Background.
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(backgroundColor());
+        painter->drawRect(buttonRect);
+
+        // Foreground.
+        painter->setPen(foregroundColor());
+        painter->setBrush(Qt::NoBrush);
+        painter->drawLine(
+                minimizeRect.left(), minimizeRect.center().y(),
+                minimizeRect.right(), minimizeRect.center().y());
+
+        painter->restore();
     }
 
-    return Qt::transparent;
+    QColor MinimizeButton::backgroundColor() const
+    {
+        const auto *deco = qobject_cast<Decoration *>(decoration());
+        if (!deco) {
+            return {};
+        }
+
+        if (isPressed()) {
+            return KColorUtils::mix(
+                    deco->titleBarBackgroundColor(),
+                    deco->titleBarForegroundColor(),
+                    0.3);
+        }
+
+        if (isHovered()) {
+            return KColorUtils::mix(
+                    deco->titleBarBackgroundColor(),
+                    deco->titleBarForegroundColor(),
+                    0.2);
+        }
+
+        return Qt::transparent;
+    }
+
+    QColor MinimizeButton::foregroundColor() const
+    {
+        const auto *deco = qobject_cast<Decoration *>(decoration());
+        if (!deco) {
+            return {};
+        }
+
+        return deco->titleBarForegroundColor();
+    }
 }
-
-QColor MinimizeButton::foregroundColor() const
-{
-    const auto *deco = qobject_cast<Decoration *>(decoration());
-    if (!deco) {
-        return {};
-    }
-
-    return deco->titleBarForegroundColor();
-}
-
-} // namespace Fluent

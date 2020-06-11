@@ -26,50 +26,48 @@
 
 namespace Fluent
 {
+    class CloseButton;
+    class MaximizeButton;
+    class MinimizeButton;
+    class MenuButton;
 
-class CloseButton;
-class MaximizeButton;
-class MinimizeButton;
-class MenuButton;
-
-class Decoration : public KDecoration2::Decoration
-{
+    class Decoration : public KDecoration2::Decoration
+    {
     Q_OBJECT
 
-public:
-    Decoration(QObject *parent = nullptr, const QVariantList &args = QVariantList());
-    ~Decoration() override;
+    public:
+        Decoration(QObject *parent = nullptr, const QVariantList &args = QVariantList());
+        ~Decoration() override;
 
-    void paint(QPainter *painter, const QRect &repaintRegion) override;
+        void paint(QPainter *painter, const QRect &repaintRegion) override;
 
-public slots:
-    void init() override;
+    public slots:
+        void init() override;
 
-private:
-    void updateBorders();
-    void updateResizeBorders();
-    void updateTitleBar();
-    void updateButtonsGeometry();
-    void updateButtonsGeometryDelayed();
-    void updateShadow();
+    private:
+        void updateBorders();
+        void updateResizeBorders();
+        void updateTitleBar();
+        void updateButtonsGeometry();
+        void updateButtonsGeometryDelayed();
+        void updateShadow();
 
-    int titleBarHeight() const;
+        int titleBarHeight() const;
 
-    QColor titleBarBackgroundColor() const;
-    QColor titleBarForegroundColor() const;
+        QColor titleBarBackgroundColor() const;
+        QColor titleBarForegroundColor() const;
 
-    void paintFrameBackground(QPainter *painter, const QRect &repaintRegion) const;
-    void paintTitleBarBackground(QPainter *painter, const QRect &repaintRegion) const;
-    void paintCaption(QPainter *painter, const QRect &repaintRegion) const;
-    void paintButtons(QPainter *painter, const QRect &repaintRegion) const;
+        void paintFrameBackground(QPainter *painter, const QRect &repaintRegion) const;
+        void paintTitleBarBackground(QPainter *painter, const QRect &repaintRegion) const;
+        void paintCaption(QPainter *painter, const QRect &repaintRegion) const;
+        void paintButtons(QPainter *painter, const QRect &repaintRegion) const;
 
-    KDecoration2::DecorationButtonGroup *m_leftButtons;
-    KDecoration2::DecorationButtonGroup *m_rightButtons;
+        KDecoration2::DecorationButtonGroup *m_leftButtons;
+        KDecoration2::DecorationButtonGroup *m_rightButtons;
 
-    friend class CloseButton;
-    friend class MaximizeButton;
-    friend class MinimizeButton;
-    friend class MenuButton;
-};
-
-} // namespace Fluent
+        friend class CloseButton;
+        friend class MaximizeButton;
+        friend class MinimizeButton;
+        friend class MenuButton;
+    };
+}

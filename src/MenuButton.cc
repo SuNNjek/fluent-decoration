@@ -61,4 +61,4 @@ namespace Fluent
 
         decoratedClient->icon().paint(painter, iconRect.toRect());
     }
-} // namespace Fluent
+}
