@@ -21,6 +21,7 @@
 #include "CloseButton.h"
 #include "MaximizeButton.h"
 #include "MinimizeButton.h"
+#include "ContextHelpButton.h"
 #include "MenuButton.h"
 
 // KDecoration
@@ -156,6 +157,9 @@ namespace Fluent
 
                 case KDecoration2::DecorationButtonType::Minimize:
                     return new MinimizeButton(this, parent);
+
+                case KDecoration2::DecorationButtonType::ContextHelp:
+                    return new ContextHelpButton(this, parent);
 
                 case KDecoration2::DecorationButtonType::Menu:
                     return new MenuButton(this, parent);
