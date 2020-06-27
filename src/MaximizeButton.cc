@@ -31,25 +31,13 @@
 namespace Fluent
 {
     MaximizeButton::MaximizeButton(Decoration *decoration, QObject *parent)
-            : DecorationButton(KDecoration2::DecorationButtonType::Maximize, decoration, parent)
+            : FluentDecorationButton(KDecoration2::DecorationButtonType::Maximize, decoration, parent)
     {
         auto *decoratedClient = decoration->client().toStrongRef().data();
         connect(decoratedClient, &KDecoration2::DecoratedClient::maximizeableChanged,
                 this, &MaximizeButton::setVisible);
 
-        connect(this, &MaximizeButton::hoveredChanged, this,
-                [this] {
-                    update();
-                });
-
-        const int titleBarHeight = decoration->titleBarHeight();
-        const QSize size(qRound(titleBarHeight * 1.33), titleBarHeight);
-        setGeometry(QRect(QPoint(0, 0), size));
         setVisible(decoratedClient->isMaximizeable());
-    }
-
-    MaximizeButton::~MaximizeButton()
-    {
     }
 
     void MaximizeButton::paint(QPainter *painter, const QRect &repaintRegion)
@@ -93,39 +81,5 @@ namespace Fluent
         }
 
         painter->restore();
-    }
-
-    QColor MaximizeButton::backgroundColor() const
-    {
-        const auto *deco = qobject_cast<Decoration *>(decoration());
-        if (!deco) {
-            return {};
-        }
-
-        if (isPressed()) {
-            return KColorUtils::mix(
-                    deco->titleBarBackgroundColor(),
-                    deco->titleBarForegroundColor(),
-                    0.3);
-        }
-
-        if (isHovered()) {
-            return KColorUtils::mix(
-                    deco->titleBarBackgroundColor(),
-                    deco->titleBarForegroundColor(),
-                    0.2);
-        }
-
-        return Qt::transparent;
-    }
-
-    QColor MaximizeButton::foregroundColor() const
-    {
-        const auto *deco = qobject_cast<Decoration *>(decoration());
-        if (!deco) {
-            return {};
-        }
-
-        return deco->titleBarForegroundColor();
     }
 }

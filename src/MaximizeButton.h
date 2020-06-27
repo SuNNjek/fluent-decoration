@@ -17,6 +17,9 @@
 
 #pragma once
 
+// own
+#include "FluentDecorationButton.h"
+
 // KDecoration
 #include <KDecoration2/DecorationButton>
 
@@ -24,18 +27,13 @@ namespace Fluent
 {
     class Decoration;
 
-    class MaximizeButton : public KDecoration2::DecorationButton
+    class MaximizeButton : public FluentDecorationButton
     {
     Q_OBJECT
 
     public:
         MaximizeButton(Decoration *decoration, QObject *parent = nullptr);
-        ~MaximizeButton() override;
 
         void paint(QPainter *painter, const QRect &repaintRegion) override;
-
-    private:
-        QColor backgroundColor() const;
-        QColor foregroundColor() const;
     };
 }

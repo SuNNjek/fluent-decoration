@@ -136,10 +136,12 @@ namespace Fluent
         connect(s.data(), &KDecoration2::DecorationSettings::borderSizeChanged, this, &Decoration::updateBorders);
         connect(s.data(), &KDecoration2::DecorationSettings::fontChanged, this, &Decoration::updateBorders);
         connect(s.data(), &KDecoration2::DecorationSettings::spacingChanged, this, &Decoration::updateBorders);
+        connect(s.data(), &KDecoration2::DecorationSettings::reconfigured, this, &Decoration::updateBorders);
 
         connect(s.data(), &KDecoration2::DecorationSettings::spacingChanged, this, &Decoration::updateButtonsGeometryDelayed);
         connect(s.data(), &KDecoration2::DecorationSettings::decorationButtonsLeftChanged, this, &Decoration::updateButtonsGeometryDelayed);
         connect(s.data(), &KDecoration2::DecorationSettings::decorationButtonsRightChanged, this, &Decoration::updateButtonsGeometryDelayed);
+        connect(s.data(), &KDecoration2::DecorationSettings::reconfigured, this, &Decoration::updateButtonsGeometryDelayed);
 
         auto buttonCreator = [this] (KDecoration2::DecorationButtonType type, KDecoration2::Decoration *decoration, QObject *parent)
                 -> KDecoration2::DecorationButton* {

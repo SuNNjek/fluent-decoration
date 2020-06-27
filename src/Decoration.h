@@ -26,9 +26,7 @@
 
 namespace Fluent
 {
-    class CloseButton;
-    class MaximizeButton;
-    class MinimizeButton;
+    class FluentDecorationButton;
     class MenuButton;
 
     class Decoration : public KDecoration2::Decoration
@@ -65,9 +63,7 @@ namespace Fluent
         KDecoration2::DecorationButtonGroup *m_leftButtons;
         KDecoration2::DecorationButtonGroup *m_rightButtons;
 
-        friend class CloseButton;
-        friend class MaximizeButton;
-        friend class MinimizeButton;
+        friend class FluentDecorationButton;
         friend class MenuButton;
     };
 }

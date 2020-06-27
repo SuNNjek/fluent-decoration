@@ -28,25 +28,13 @@
 namespace Fluent
 {
     CloseButton::CloseButton(Decoration *decoration, QObject *parent)
-            : DecorationButton(KDecoration2::DecorationButtonType::Close, decoration, parent)
+            : FluentDecorationButton(KDecoration2::DecorationButtonType::Close, decoration, parent)
     {
         auto *decoratedClient = decoration->client().toStrongRef().data();
         connect(decoratedClient, &KDecoration2::DecoratedClient::closeableChanged,
                 this, &CloseButton::setVisible);
 
-        connect(this, &CloseButton::hoveredChanged, this,
-                [this] {
-                    update();
-                });
-
-        const int titleBarHeight = decoration->titleBarHeight();
-        const QSize size(qRound(titleBarHeight * 1.33), titleBarHeight);
-        setGeometry(QRect(QPoint(0, 0), size));
         setVisible(decoratedClient->isCloseable());
-    }
-
-    CloseButton::~CloseButton()
-    {
     }
 
     void CloseButton::paint(QPainter *painter, const QRect &repaintRegion)
@@ -100,15 +88,4 @@ namespace Fluent
 
         return Qt::transparent;
     }
-
-    QColor CloseButton::foregroundColor() const
-    {
-        const auto *deco = qobject_cast<Decoration *>(decoration());
-        if (!deco) {
-            return {};
-        }
-
-        return deco->titleBarForegroundColor();
-    }
-
 }

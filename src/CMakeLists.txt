@@ -14,6 +14,7 @@ find_package (KF5 REQUIRED COMPONENTS
 
 set (decoration_SRCS
     BoxShadowHelper.cc
+    FluentDecorationButton.cc
     CloseButton.cc
     Decoration.cc
     MaximizeButton.cc
