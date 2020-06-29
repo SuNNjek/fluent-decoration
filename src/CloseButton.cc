@@ -75,7 +75,7 @@ namespace Fluent
             return decoratedClient->color(
                     KDecoration2::ColorGroup::Warning,
                     KDecoration2::ColorRole::Foreground
-            ).lighter();
+            ).darker(150);
         }
 
         if (isHovered()) {
