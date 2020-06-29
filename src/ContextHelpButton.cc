@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Vlad Zagorodniy <vladzzag@gmail.com>
+ * Copyright (C) 2020 SuNNjek <sunnerlp@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,53 +16,52 @@
  */
 
 // own
-#include "MinimizeButton.h"
+#include "ContextHelpButton.h"
 #include "Decoration.h"
 
 // KDecoration
 #include <KDecoration2/DecoratedClient>
 
-// KF
-#include <KColorUtils>
-
 // Qt
 #include <QPainter>
+#include <QPainterPath>
 
 namespace Fluent
 {
-    MinimizeButton::MinimizeButton(Decoration *decoration, QObject *parent)
-            : FluentDecorationButton(KDecoration2::DecorationButtonType::Minimize, decoration, parent)
+    ContextHelpButton::ContextHelpButton(Decoration *decoration, QObject *parent)
+        : FluentDecorationButton(KDecoration2::DecorationButtonType::ContextHelp, decoration, parent)
     {
         auto *decoratedClient = decoration->client().toStrongRef().data();
-        connect(decoratedClient, &KDecoration2::DecoratedClient::minimizeableChanged,
-                this, &MinimizeButton::setVisible);
+        connect(decoratedClient, &KDecoration2::DecoratedClient::providesContextHelpChanged,
+                this, &ContextHelpButton::setVisible);
 
-        setVisible(decoratedClient->isMinimizeable());
+        setVisible(decoratedClient->providesContextHelp());
     }
 
-    void MinimizeButton::paint(QPainter *painter, const QRect &repaintRegion)
+    void ContextHelpButton::paint(QPainter *painter, const QRect &repaintRegion)
     {
         Q_UNUSED(repaintRegion)
 
         const QRectF buttonRect = geometry();
-        QRectF minimizeRect = QRectF(0, 0, 10, 10);
-        minimizeRect.moveCenter(buttonRect.center().toPoint());
 
         painter->save();
 
-        painter->setRenderHints(QPainter::Antialiasing, false);
+        painter->setRenderHints(QPainter::Antialiasing, true);
 
-        // Background.
+        // Background
         painter->setPen(Qt::NoPen);
         painter->setBrush(backgroundColor());
         painter->drawRect(buttonRect);
 
-        // Foreground.
+        // Foreground
         painter->setPen(foregroundColor());
         painter->setBrush(Qt::NoBrush);
-        painter->drawLine(
-                minimizeRect.left(), minimizeRect.center().y(),
-                minimizeRect.right(), minimizeRect.center().y());
+
+        QFont font = painter->font();
+        font.setPointSize(11);
+        painter->setFont(font);
+
+        painter->drawText(buttonRect, Qt::AlignCenter, "?");
 
         painter->restore();
     }

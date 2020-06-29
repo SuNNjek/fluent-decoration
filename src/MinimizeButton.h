@@ -17,27 +17,23 @@
 
 #pragma once
 
+// own
+#include "FluentDecorationButton.h"
+
 // KDecoration
 #include <KDecoration2/DecorationButton>
 
 namespace Fluent
 {
+    class Decoration;
 
-class Decoration;
-
-class MinimizeButton : public KDecoration2::DecorationButton
-{
+    class MinimizeButton : public FluentDecorationButton
+    {
     Q_OBJECT
 
-public:
-    MinimizeButton(Decoration *decoration, QObject *parent = nullptr);
-    ~MinimizeButton() override;
+    public:
+        MinimizeButton(Decoration *decoration, QObject *parent = nullptr);
 
-    void paint(QPainter *painter, const QRect &repaintRegion) override;
-
-private:
-    QColor backgroundColor() const;
-    QColor foregroundColor() const;
-};
-
-} // namespace Fluent
+        void paint(QPainter *painter, const QRect &repaintRegion) override;
+    };
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Vlad Zagorodniy <vladzzag@gmail.com>
+ * Copyright (C) 2020 SuNNjek <sunnerlp@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,18 +25,13 @@
 
 namespace Fluent
 {
-    class Decoration;
-
-    class CloseButton : public FluentDecorationButton
+    class ContextHelpButton : public FluentDecorationButton
     {
     Q_OBJECT
 
     public:
-        CloseButton(Decoration *decoration, QObject *parent = nullptr);
+        ContextHelpButton(Decoration *decoration, QObject *parent = nullptr);
 
         void paint(QPainter *painter, const QRect &repaintRegion) override;
-
-    protected:
-        QColor backgroundColor() const override;
     };
 }
