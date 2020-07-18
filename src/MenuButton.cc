@@ -24,6 +24,7 @@
 
 // KF
 #include <KColorUtils>
+#include <KIconLoader>
 
 // Qt
 #include <QPainter>
@@ -53,12 +54,32 @@ namespace Fluent
     {
         Q_UNUSED(repaintRegion)
 
-        auto *decoratedClient = decoration()->client().toStrongRef().data();
+        const QSizeF iconSize(24, 24);
+        QRectF iconRect( geometry().topLeft(), iconSize );
+        iconRect.moveCenter(geometry().center().toPoint());
 
-        const QRectF buttonRect = geometry();
-        QRectF iconRect = QRectF(0, 0, 24, 24);
-        iconRect.moveCenter(buttonRect.center().toPoint());
+        const auto *decoratedClient = decoration()->client().toStrongRef().data();
+        if (const auto *deco = qobject_cast<Decoration *>(decoration()))
+        {
+            const QPalette activePalette = KIconLoader::global()->customPalette();
+            QPalette palette = decoratedClient->palette();
 
-        decoratedClient->icon().paint(painter, iconRect.toRect());
+            palette.setColor(QPalette::Foreground, deco->titleBarForegroundColor());
+            KIconLoader::global()->setCustomPalette(palette);
+            decoratedClient->icon().paint(painter, iconRect.toRect());
+
+            if (activePalette == QPalette())
+            {
+                KIconLoader::global()->resetPalette();
+            }
+            else
+            {
+                KIconLoader::global()->setCustomPalette(palette);
+            }
+        }
+        else
+        {
+            decoratedClient->icon().paint(painter, iconRect.toRect());
+        }
     }
 }
