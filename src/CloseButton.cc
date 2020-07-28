@@ -19,8 +19,9 @@
 #include "CloseButton.h"
 #include "Decoration.h"
 
-// KDecoration
+// KF
 #include <KDecoration2/DecoratedClient>
+#include <KColorUtils>
 
 // Qt
 #include <QPainter>
@@ -72,10 +73,12 @@ namespace Fluent
 
         if (isPressed()) {
             auto *decoratedClient = deco->client().toStrongRef().data();
-            return decoratedClient->color(
+            const auto color = decoratedClient->color(
                     KDecoration2::ColorGroup::Warning,
                     KDecoration2::ColorRole::Foreground
-            ).darker(150);
+            );
+
+            return KColorUtils::mix(color, deco->titleBarBackgroundColor(), 0.3);
         }
 
         if (isHovered()) {

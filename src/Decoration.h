@@ -39,6 +39,11 @@ namespace Fluent
 
         void paint(QPainter *painter, const QRect &repaintRegion) override;
 
+        int titleBarHeight() const;
+
+        QColor titleBarBackgroundColor() const;
+        QColor titleBarForegroundColor() const;
+
     public slots:
         void init() override;
 
@@ -50,11 +55,6 @@ namespace Fluent
         void updateButtonsGeometryDelayed();
         void updateShadow();
 
-        int titleBarHeight() const;
-
-        QColor titleBarBackgroundColor() const;
-        QColor titleBarForegroundColor() const;
-
         void paintFrameBackground(QPainter *painter, const QRect &repaintRegion) const;
         void paintTitleBarBackground(QPainter *painter, const QRect &repaintRegion) const;
         void paintCaption(QPainter *painter, const QRect &repaintRegion) const;
@@ -62,8 +62,5 @@ namespace Fluent
 
         KDecoration2::DecorationButtonGroup *m_leftButtons;
         KDecoration2::DecorationButtonGroup *m_rightButtons;
-
-        friend class FluentDecorationButton;
-        friend class MenuButton;
     };
 }
