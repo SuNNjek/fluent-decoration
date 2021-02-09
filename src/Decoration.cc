@@ -38,47 +38,16 @@ namespace Fluent
 {
     namespace
     {
-        struct ShadowParams
-        {
-            ShadowParams() = default;
-
-            ShadowParams(const QPoint &offset, int radius, qreal opacity)
-                    : offset(offset)
-                    , radius(radius)
-                    , opacity(opacity) {}
-
-            QPoint offset;
-            int radius = 0;
-            qreal opacity = 0;
-        };
-
-        struct CompositeShadowParams
-        {
-            CompositeShadowParams() = default;
-
-            CompositeShadowParams(
-                    const QPoint &offset,
-                    const ShadowParams &shadow1,
-                    const ShadowParams &shadow2)
-                    : offset(offset)
-                    , shadow1(shadow1)
-                    , shadow2(shadow2) {}
-
-            QPoint offset;
-            ShadowParams shadow1;
-            ShadowParams shadow2;
-        };
-
         const CompositeShadowParams s_shadowParams = CompositeShadowParams(
-                QPoint(0, 18),
-                ShadowParams(QPoint(0, 0), 64, 0.8),
-                ShadowParams(QPoint(0, -10), 24, 0.1)
-        );
+                QPoint(0, 12),
+                ShadowParams(QPoint(0, 0), 48, 0.8),
+                ShadowParams(QPoint(0, -6), 24, 0.2));
     }
 
     static int s_decoCount = 0;
     static QColor s_shadowColor(0, 0, 0);
     static QSharedPointer<KDecoration2::DecorationShadow> s_cachedShadow;
+    static QSharedPointer<KDecoration2::DecorationShadow> s_cachedShadowInactive;
 
     static qreal s_titleBarOpacityActive = 0.8;
     static qreal s_titleBarOpacityInactive = 0.8;
@@ -124,10 +93,15 @@ namespace Fluent
             update(titleBar());
         };
 
+        auto onActiveChanged = [this] {
+            update(titleBar());
+            updateShadow();
+        };
+
         connect(decoratedClient, &KDecoration2::DecoratedClient::captionChanged,
                 this, repaintTitleBar);
         connect(decoratedClient, &KDecoration2::DecoratedClient::activeChanged,
-                this, repaintTitleBar);
+                this, onActiveChanged);
 
         updateBorders();
         updateResizeBorders();
@@ -234,74 +208,15 @@ namespace Fluent
 
     void Decoration::updateShadow()
     {
-        if (!s_cachedShadow.isNull()) {
-            setShadow(s_cachedShadow);
-            return;
+        const auto *decoratedClient = client().toStrongRef().data();
+        auto isActive = decoratedClient->isActive();
+
+        auto &shadow = isActive ? s_cachedShadow : s_cachedShadowInactive;
+        if (shadow.isNull()) {
+            shadow = createShadow(s_shadowParams, isActive ? 1.0 : 0.5);
         }
 
-        auto withOpacity = [] (const QColor &color, qreal opacity) -> QColor {
-            QColor c(color);
-            c.setAlphaF(opacity);
-            return c;
-        };
-
-        // In order to properly render a box shadow with a given radius `shadowSize`,
-        // the box size should be at least `2 * QSize(shadowSize, shadowSize)`.
-        const int shadowSize = qMax(s_shadowParams.shadow1.radius, s_shadowParams.shadow2.radius);
-        const QRect box(shadowSize, shadowSize, 2 * shadowSize + 1, 2 * shadowSize + 1);
-        const QRect rect = box.adjusted(-shadowSize, -shadowSize, shadowSize, shadowSize);
-
-        QImage shadow(rect.size(), QImage::Format_ARGB32_Premultiplied);
-        shadow.fill(Qt::transparent);
-
-        QPainter painter(&shadow);
-        painter.setRenderHint(QPainter::Antialiasing);
-
-        // Draw the "shape" shadow.
-        BoxShadowHelper::boxShadow(
-                &painter,
-                box,
-                s_shadowParams.shadow1.offset,
-                s_shadowParams.shadow1.radius,
-                withOpacity(s_shadowColor, s_shadowParams.shadow1.opacity));
-
-        // Draw the "contrast" shadow.
-        BoxShadowHelper::boxShadow(
-                &painter,
-                box,
-                s_shadowParams.shadow2.offset,
-                s_shadowParams.shadow2.radius,
-                withOpacity(s_shadowColor, s_shadowParams.shadow2.opacity));
-
-        // Mask out inner rect.
-        const QMargins padding = QMargins(
-                shadowSize - s_shadowParams.offset.x(),
-                shadowSize - s_shadowParams.offset.y(),
-                shadowSize + s_shadowParams.offset.x(),
-                shadowSize + s_shadowParams.offset.y());
-        const QRect innerRect = rect - padding;
-
-        // Draw outline.
-        QPen outLine (QColor(100,100,100));
-        outLine.setWidth(2);
-        outLine.setJoinStyle(Qt::MiterJoin);
-        painter.setPen(outLine);
-        painter.setBrush(Qt::NoBrush);
-        painter.drawRect(innerRect);
-
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(Qt::black);
-        painter.setCompositionMode(QPainter::CompositionMode_DestinationOut);
-        painter.drawRect(innerRect);
-
-        painter.end();
-
-        s_cachedShadow = QSharedPointer<KDecoration2::DecorationShadow>::create();
-        s_cachedShadow->setPadding(padding);
-        s_cachedShadow->setInnerShadowRect(QRect(shadow.rect().center(), QSize(1, 1)));
-        s_cachedShadow->setShadow(shadow);
-
-        setShadow(s_cachedShadow);
+        setShadow(shadow);
     }
 
     int Decoration::titleBarHeight() const
@@ -399,5 +314,70 @@ namespace Fluent
     {
         m_leftButtons->paint(painter, repaintRegion);
         m_rightButtons->paint(painter, repaintRegion);
+    }
+
+    QSharedPointer<KDecoration2::DecorationShadow> Decoration::createShadow(const CompositeShadowParams shadowParams, const qreal strength)
+    {
+        auto withOpacity = [] (const QColor &color, qreal opacity) -> QColor {
+            QColor c(color);
+            c.setAlphaF(opacity);
+            return c;
+        };
+
+        const int shadowSize = qMax(shadowParams.shadow1.radius, shadowParams.shadow2.radius);
+        const QRect box(shadowSize, shadowSize, 2 * shadowSize + 1, 2 * shadowSize + 1);
+        const QRect rect = box.adjusted(-shadowSize, -shadowSize, shadowSize, shadowSize);
+
+        QImage shadow(rect.size(), QImage::Format_ARGB32_Premultiplied);
+        shadow.fill(Qt::transparent);
+
+        QPainter painter(&shadow);
+        painter.setRenderHint(QPainter::Antialiasing);
+
+        // Draw the "shape" shadow.
+        BoxShadowHelper::boxShadow(
+                &painter,
+                box,
+                shadowParams.shadow1.offset,
+                shadowParams.shadow1.radius,
+                withOpacity(s_shadowColor, shadowParams.shadow1.opacity * strength));
+
+        // Draw the "contrast" shadow.
+        BoxShadowHelper::boxShadow(
+                &painter,
+                box,
+                shadowParams.shadow2.offset,
+                shadowParams.shadow2.radius,
+                withOpacity(s_shadowColor, shadowParams.shadow2.opacity * strength));
+
+        // Mask out inner rect.
+        const QMargins padding = QMargins(
+                shadowSize - shadowParams.offset.x(),
+                shadowSize - shadowParams.offset.y(),
+                shadowSize + shadowParams.offset.x(),
+                shadowSize + shadowParams.offset.y());
+        const QRect innerRect = rect - padding;
+
+        // Draw outline.
+        QPen outLine (QColor(100,100,100));
+        outLine.setWidth(2);
+        outLine.setJoinStyle(Qt::MiterJoin);
+        painter.setPen(outLine);
+        painter.setBrush(Qt::NoBrush);
+        painter.drawRect(innerRect);
+
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(Qt::black);
+        painter.setCompositionMode(QPainter::CompositionMode_DestinationOut);
+        painter.drawRect(innerRect);
+
+        painter.end();
+
+        auto decorationShadow = QSharedPointer<KDecoration2::DecorationShadow>::create();
+        decorationShadow->setPadding(padding);
+        decorationShadow->setInnerShadowRect(QRect(shadow.rect().center(), QSize(1, 1)));
+        decorationShadow->setShadow(shadow);
+
+        return decorationShadow;
     }
 }

@@ -29,6 +29,37 @@ namespace Fluent
     class FluentDecorationButton;
     class MenuButton;
 
+    struct ShadowParams
+    {
+        ShadowParams() = default;
+
+        ShadowParams(const QPoint &offset, int radius, qreal opacity)
+                : offset(offset)
+                , radius(radius)
+                , opacity(opacity) {}
+
+        QPoint offset;
+        int radius = 0;
+        qreal opacity = 0;
+    };
+
+    struct CompositeShadowParams
+    {
+        CompositeShadowParams() = default;
+
+        CompositeShadowParams(
+                const QPoint &offset,
+                const ShadowParams &shadow1,
+                const ShadowParams &shadow2)
+                : offset(offset)
+                , shadow1(shadow1)
+                , shadow2(shadow2) {}
+
+        QPoint offset;
+        ShadowParams shadow1;
+        ShadowParams shadow2;
+    };
+
     class Decoration : public KDecoration2::Decoration
     {
     Q_OBJECT
@@ -38,6 +69,11 @@ namespace Fluent
         ~Decoration() override;
 
         void paint(QPainter *painter, const QRect &repaintRegion) override;
+
+        int titleBarHeight() const;
+
+        QColor titleBarBackgroundColor() const;
+        QColor titleBarForegroundColor() const;
 
     public slots:
         void init() override;
@@ -50,20 +86,14 @@ namespace Fluent
         void updateButtonsGeometryDelayed();
         void updateShadow();
 
-        int titleBarHeight() const;
-
-        QColor titleBarBackgroundColor() const;
-        QColor titleBarForegroundColor() const;
-
         void paintFrameBackground(QPainter *painter, const QRect &repaintRegion) const;
         void paintTitleBarBackground(QPainter *painter, const QRect &repaintRegion) const;
         void paintCaption(QPainter *painter, const QRect &repaintRegion) const;
         void paintButtons(QPainter *painter, const QRect &repaintRegion) const;
 
+        static QSharedPointer<KDecoration2::DecorationShadow> createShadow(const CompositeShadowParams shadowParams, const qreal strength);
+
         KDecoration2::DecorationButtonGroup *m_leftButtons;
         KDecoration2::DecorationButtonGroup *m_rightButtons;
-
-        friend class FluentDecorationButton;
-        friend class MenuButton;
     };
 }

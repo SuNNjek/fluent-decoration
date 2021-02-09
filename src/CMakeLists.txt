@@ -9,24 +9,12 @@ find_package (KF5 REQUIRED COMPONENTS
     Config
     CoreAddons
     GuiAddons
+    IconThemes
     WindowSystem
 )
 
-set (decoration_SRCS
-    BoxShadowHelper.cc
-    FluentDecorationButton.cc
-    CloseButton.cc
-    Decoration.cc
-    MaximizeButton.cc
-    MinimizeButton.cc
-    ContextHelpButton.cc
-    MenuButton.cc
-    plugin.cc
-)
-
-add_library (fluentdecoration MODULE
-    ${decoration_SRCS}
-)
+file(GLOB decoration_SRCS "./*.cc")
+add_library (fluentdecoration MODULE ${decoration_SRCS})
 
 target_link_libraries (fluentdecoration
     PUBLIC
@@ -36,6 +24,7 @@ target_link_libraries (fluentdecoration
         KF5::ConfigGui
         KF5::CoreAddons
         KF5::GuiAddons
+        KF5::IconThemes
         KF5::WindowSystem
 
     PRIVATE
